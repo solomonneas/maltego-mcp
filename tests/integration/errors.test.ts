@@ -12,8 +12,8 @@ describe("integration: error propagation", () => {
 
   beforeEach(async () => {
     reg = new GraphRegistry();
-    tools = graphToolHandlers(reg);
     tmp = await mkdtemp(join(tmpdir(), "maltego-err-int-"));
+    tools = graphToolHandlers(reg, { outputDir: tmp });
   });
 
   afterEach(async () => {

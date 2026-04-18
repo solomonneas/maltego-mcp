@@ -3,7 +3,7 @@ import { GraphRegistry } from "../server/registry.js";
 import { writeMtgxFile } from "../graph/writer.js";
 import { readMtgxFile } from "../graph/reader.js";
 import { ToolFileSystemError, ToolValidationError } from "../server/errors.js";
-import { resolveHomeTilde, rejectNullBytes } from "../server/paths.js";
+import { confineToOutputDir } from "../server/paths.js";
 import { randomUUID } from "node:crypto";
 
 export interface CreateGraphInput { name: string; }
@@ -36,7 +36,7 @@ async function pathExists(path: string): Promise<boolean> {
   }
 }
 
-export function graphToolHandlers(reg: GraphRegistry) {
+export function graphToolHandlers(reg: GraphRegistry, config: { outputDir: string }) {
   return {
     async maltego_create_graph(input: CreateGraphInput) {
       if (!input?.name) throw new ToolValidationError("name is required");
@@ -67,8 +67,7 @@ export function graphToolHandlers(reg: GraphRegistry) {
 
     async maltego_save_graph(input: SaveGraphInput) {
       const g = reg.getOrThrow(input.graphId);
-      const resolved = resolveHomeTilde(input.path);
-      rejectNullBytes(resolved);
+      const resolved = confineToOutputDir(input.path, config.outputDir);
       if (!input.overwrite && (await pathExists(resolved))) {
         throw new ToolFileSystemError(
           `file already exists, refusing to overwrite (pass overwrite=true): ${resolved}`,
@@ -92,8 +91,7 @@ export function graphToolHandlers(reg: GraphRegistry) {
     },
 
     async maltego_load_graph(input: LoadGraphInput) {
-      const resolved = resolveHomeTilde(input.path);
-      rejectNullBytes(resolved);
+      const resolved = confineToOutputDir(input.path, config.outputDir);
       const newId = `g-${randomUUID().slice(0, 8)}`;
       const g = await readMtgxFile(resolved, newId);
       reg.register(g);

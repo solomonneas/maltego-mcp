@@ -3,13 +3,13 @@ import { writeMtgxFile } from "../graph/writer.js";
 import { whoisLookup } from "../lookups/whois.js";
 import { dnsLookup } from "../lookups/dns.js";
 import { asnLookup } from "../lookups/asn.js";
-import { resolveHomeTilde } from "../server/paths.js";
+import { confineToOutputDir } from "../server/paths.js";
 
 export interface ExpandIpInput { ip: string; outputPath: string; }
 export interface ExpandDomainInput { domain: string; outputPath: string; }
 export interface ExpandHashInput { hash: string; algorithm?: "md5" | "sha1" | "sha256" | "sha512"; outputPath: string; }
 
-export function expandToolHandlers(reg: GraphRegistry) {
+export function expandToolHandlers(reg: GraphRegistry, config: { outputDir: string }) {
   return {
     async maltego_expand_ip(input: ExpandIpInput) {
       const g = reg.create(`expand-ip-${input.ip}`);
@@ -29,7 +29,7 @@ export function expandToolHandlers(reg: GraphRegistry) {
         }
       }
 
-      const outPath = resolveHomeTilde(input.outputPath);
+      const outPath = confineToOutputDir(input.outputPath, config.outputDir);
       await writeMtgxFile(g, outPath);
       return { graphId: g.id, path: outPath, entityCount: g.entityCount(), linkCount: g.linkCount() };
     },
@@ -72,7 +72,7 @@ export function expandToolHandlers(reg: GraphRegistry) {
         }
       }
 
-      const outPath = resolveHomeTilde(input.outputPath);
+      const outPath = confineToOutputDir(input.outputPath, config.outputDir);
       await writeMtgxFile(g, outPath);
       return { graphId: g.id, path: outPath, entityCount: g.entityCount(), linkCount: g.linkCount() };
     },
@@ -84,7 +84,7 @@ export function expandToolHandlers(reg: GraphRegistry) {
         value: input.hash,
         properties: { algorithm: input.algorithm ?? "unknown" }
       });
-      const outPath = resolveHomeTilde(input.outputPath);
+      const outPath = confineToOutputDir(input.outputPath, config.outputDir);
       await writeMtgxFile(g, outPath);
       return { graphId: g.id, path: outPath, entityCount: g.entityCount(), linkCount: g.linkCount() };
     }

@@ -39,7 +39,7 @@ describe("integration: expand_domain writes a real .mtgx", () => {
   });
 
   it("produces a non-empty .mtgx containing the domain and its resolved IP", async () => {
-    const tools = expandToolHandlers(reg);
+    const tools = expandToolHandlers(reg, { outputDir: tmp });
     const out = join(tmp, "evil.mtgx");
     const result = await tools.maltego_expand_domain({ domain: "evil.example", outputPath: out });
     const fstat = await stat(result.path);
@@ -55,7 +55,7 @@ describe("integration: expand_domain writes a real .mtgx", () => {
       ok: true,
       data: { domain: "multi.example", a: ["9.9.9.9", "9.9.9.10"], aaaa: [], mx: [], ns: [], txt: [] }
     });
-    const tools = expandToolHandlers(reg);
+    const tools = expandToolHandlers(reg, { outputDir: tmp });
     const out = join(tmp, "multi.mtgx");
     const result = await tools.maltego_expand_domain({ domain: "multi.example", outputPath: out });
     const fstat = await stat(result.path);

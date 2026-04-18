@@ -12,8 +12,8 @@ describe("integration: canonical round-trip", () => {
 
   beforeEach(async () => {
     reg = new GraphRegistry();
-    tools = graphToolHandlers(reg);
     tmp = await mkdtemp(join(tmpdir(), "maltego-mcp-int-"));
+    tools = graphToolHandlers(reg, { outputDir: tmp });
   });
 
   afterEach(async () => {

@@ -33,7 +33,7 @@ describe("maltego_expand_domain", () => {
   });
 
   it("builds a graph with the domain, whois phrase, DNS IPs, and ASN", async () => {
-    const tools = expandToolHandlers(reg);
+    const tools = expandToolHandlers(reg, { outputDir: tmp });
     const out = join(tmp, "evil.mtgx");
     const result = await tools.maltego_expand_domain({ domain: "evil.example", outputPath: out });
     expect(result.entityCount).toBeGreaterThanOrEqual(3);
