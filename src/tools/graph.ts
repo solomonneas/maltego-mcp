@@ -3,6 +3,7 @@ import { GraphRegistry } from "../server/registry.js";
 import { writeMtgxFile } from "../graph/writer.js";
 import { readMtgxFile } from "../graph/reader.js";
 import { ToolFileSystemError, ToolValidationError } from "../server/errors.js";
+import { resolveHomeTilde, rejectNullBytes } from "../server/paths.js";
 import { randomUUID } from "node:crypto";
 
 export interface CreateGraphInput { name: string; }
@@ -32,19 +33,6 @@ async function pathExists(path: string): Promise<boolean> {
     return true;
   } catch {
     return false;
-  }
-}
-
-function resolveHomeTilde(path: string): string {
-  if (!path.startsWith("~")) return path;
-  const home = process.env.HOME || process.env.USERPROFILE;
-  if (!home) throw new ToolValidationError("cannot resolve '~': no HOME/USERPROFILE set");
-  return path.replace(/^~/, home);
-}
-
-function rejectTraversal(path: string): void {
-  if (path.includes("\0")) {
-    throw new ToolValidationError(`path contains NUL byte: ${path}`);
   }
 }
 
@@ -80,7 +68,7 @@ export function graphToolHandlers(reg: GraphRegistry) {
     async maltego_save_graph(input: SaveGraphInput) {
       const g = reg.getOrThrow(input.graphId);
       const resolved = resolveHomeTilde(input.path);
-      rejectTraversal(resolved);
+      rejectNullBytes(resolved);
       if (!input.overwrite && (await pathExists(resolved))) {
         throw new ToolFileSystemError(
           `file already exists, refusing to overwrite (pass overwrite=true): ${resolved}`,
@@ -105,7 +93,7 @@ export function graphToolHandlers(reg: GraphRegistry) {
 
     async maltego_load_graph(input: LoadGraphInput) {
       const resolved = resolveHomeTilde(input.path);
-      rejectTraversal(resolved);
+      rejectNullBytes(resolved);
       const newId = `g-${randomUUID().slice(0, 8)}`;
       const g = await readMtgxFile(resolved, newId);
       reg.register(g);

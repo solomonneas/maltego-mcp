@@ -3,16 +3,11 @@ import { writeMtgxFile } from "../graph/writer.js";
 import { whoisLookup } from "../lookups/whois.js";
 import { dnsLookup } from "../lookups/dns.js";
 import { asnLookup } from "../lookups/asn.js";
+import { resolveHomeTilde } from "../server/paths.js";
 
 export interface ExpandIpInput { ip: string; outputPath: string; }
 export interface ExpandDomainInput { domain: string; outputPath: string; }
 export interface ExpandHashInput { hash: string; algorithm?: "md5" | "sha1" | "sha256" | "sha512"; outputPath: string; }
-
-function resolveHomeTilde(path: string): string {
-  if (!path.startsWith("~")) return path;
-  const home = process.env.HOME || process.env.USERPROFILE || "";
-  return path.replace(/^~/, home);
-}
 
 export function expandToolHandlers(reg: GraphRegistry) {
   return {
