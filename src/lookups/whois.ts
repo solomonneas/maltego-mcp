@@ -1,4 +1,4 @@
-import whoisLib from "whois";
+import { lookup as whoisLookupFn } from "whois";
 import type { LookupOutcome } from "../types.js";
 
 export interface WhoisData {
@@ -26,7 +26,7 @@ function extractAll(line: RegExp, text: string): string[] {
 
 export function whoisLookup(domain: string): Promise<LookupOutcome<WhoisData>> {
   return new Promise((resolvePromise) => {
-    whoisLib.lookup(domain, (err: Error | null, data: string) => {
+    whoisLookupFn(domain, (err: Error | null, data: string) => {
       if (err) {
         resolvePromise({
           ok: false,

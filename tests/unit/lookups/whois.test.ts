@@ -4,11 +4,9 @@ import { resolve } from "node:path";
 import { whoisLookup } from "../../../src/lookups/whois.js";
 
 vi.mock("whois", () => ({
-  default: {
-    lookup: (domain: string, cb: (err: Error | null, data: string) => void) => {
-      readFile(resolve(__dirname, "../../../fixtures/responses/whois-example.com.txt"), "utf8")
-        .then((data) => cb(null, data));
-    }
+  lookup: (domain: string, cb: (err: Error | null, data: string) => void) => {
+    readFile(resolve(__dirname, "../../../fixtures/responses/whois-example.com.txt"), "utf8")
+      .then((data) => cb(null, data));
   }
 }));
 
