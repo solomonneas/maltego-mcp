@@ -31,4 +31,19 @@ describe("readMtgxBytes", () => {
     const bytes = await zip.generateAsync({ type: "uint8array" });
     await expect(readMtgxBytes(bytes, "g-x")).rejects.toThrow(/Graph1\.graphml/);
   });
+
+  it("preserves entity positions across round-trip", async () => {
+    const original = new Graph("g-1", "rt");
+    const a = original.addEntity({ type: "Domain", value: "a.com", properties: {}, position: { x: 100, y: 200 } });
+    const b = original.addEntity({ type: "IPv4Address", value: "1.2.3.4", properties: {}, position: { x: 340, y: 50 } });
+    original.addLink({ from: a.id, to: b.id, label: "resolves", properties: {} });
+
+    const bytes = await writeMtgxBytes(original);
+    const restored = await readMtgxBytes(bytes, "g-2");
+
+    const aRestored = restored.allEntities().find((e) => e.value === "a.com");
+    const bRestored = restored.allEntities().find((e) => e.value === "1.2.3.4");
+    expect(aRestored?.position).toEqual({ x: 100, y: 200 });
+    expect(bRestored?.position).toEqual({ x: 340, y: 50 });
+  });
 });

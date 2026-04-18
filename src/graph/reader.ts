@@ -42,7 +42,18 @@ export async function readMtgxBytes(bytes: Uint8Array | Buffer, newGraphId: stri
         properties[name] = val;
       }
     }
-    const added = graph.addEntity({ type, value, properties });
+    // find the graphics data entry (has y:ShapeNode)
+    const graphicsData = dataEntries.find((d: any) => d["y:ShapeNode"]);
+    const geometry = graphicsData?.["y:ShapeNode"]?.["y:Geometry"];
+    let position: { x: number; y: number } | undefined;
+    if (geometry) {
+      const x = Number(geometry["@_x"]);
+      const y = Number(geometry["@_y"]);
+      if (Number.isFinite(x) && Number.isFinite(y)) {
+        position = { x, y };
+      }
+    }
+    const added = graph.addEntity({ type, value, properties, position });
     idMap.set(oldId, added.id);
   }
 
