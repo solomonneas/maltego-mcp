@@ -71,4 +71,19 @@ describe("Graph", () => {
     expect(snap.entities).toHaveLength(2);
     expect(snap.links).toHaveLength(1);
   });
+
+  it("ensureEntity returns existing entity instead of throwing", () => {
+    const g = new Graph("g-1", "test");
+    const a = g.addEntity({ type: "Domain", value: "a.com", properties: {} });
+    const again = g.ensureEntity({ type: "Domain", value: "a.com", properties: {} });
+    expect(again.id).toBe(a.id);
+    expect(g.entityCount()).toBe(1);
+  });
+
+  it("ensureEntity creates a new entity if none exists", () => {
+    const g = new Graph("g-1", "test");
+    const a = g.ensureEntity({ type: "Domain", value: "fresh.com", properties: {} });
+    expect(a.id).toBe("e-1");
+    expect(g.entityCount()).toBe(1);
+  });
 });

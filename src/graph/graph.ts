@@ -50,6 +50,19 @@ export class Graph {
     return entity;
   }
 
+  ensureEntity(input: AddEntityInput): Entity {
+    const type = normalizeEntityType(input.type);
+    const key = `${type}::${input.value}`;
+    if (this.entityKey.has(key)) {
+      for (const entity of this.entities.values()) {
+        if (entity.type === type && entity.value === input.value) {
+          return entity;
+        }
+      }
+    }
+    return this.addEntity(input);
+  }
+
   addLink(input: AddLinkInput): Link {
     if (!this.entities.has(input.from)) {
       throw new Error(`unknown entity on link.from: ${input.from}`);

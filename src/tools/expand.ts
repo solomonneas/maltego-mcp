@@ -22,14 +22,14 @@ export function expandToolHandlers(reg: GraphRegistry) {
 
       const asn = await asnLookup(input.ip);
       if (asn.ok) {
-        const asE = g.addEntity({
+        const asE = g.ensureEntity({
           type: "AS",
           value: String(asn.data.asn),
           properties: { organization: asn.data.organization ?? "", country: asn.data.country, registry: asn.data.registry }
         });
         g.addLink({ from: ipE.id, to: asE.id, label: `AS (${asn.data.prefix})`, properties: {} });
         if (asn.data.prefix) {
-          const nb = g.addEntity({ type: "Netblock", value: asn.data.prefix, properties: {} });
+          const nb = g.ensureEntity({ type: "Netblock", value: asn.data.prefix, properties: {} });
           g.addLink({ from: ipE.id, to: nb.id, label: "within", properties: {} });
         }
       }
@@ -48,7 +48,7 @@ export function expandToolHandlers(reg: GraphRegistry) {
       if (whois.ok) {
         const w = whois.data;
         if (w.registrar) {
-          const rE = g.addEntity({
+          const rE = g.ensureEntity({
             type: "Phrase",
             value: `[registrar] ${w.registrar}`,
             properties: { creationDate: w.creationDate ?? "", expiryDate: w.registryExpiryDate ?? "" }
@@ -56,18 +56,18 @@ export function expandToolHandlers(reg: GraphRegistry) {
           g.addLink({ from: dE.id, to: rE.id, label: "registered via", properties: {} });
         }
         for (const ns of w.nameservers) {
-          const nsE = g.addEntity({ type: "Domain", value: ns.toLowerCase(), properties: { role: "nameserver" } });
+          const nsE = g.ensureEntity({ type: "Domain", value: ns.toLowerCase(), properties: { role: "nameserver" } });
           g.addLink({ from: dE.id, to: nsE.id, label: "uses NS", properties: {} });
         }
       }
 
       if (dns.ok) {
         for (const ip of dns.data.a) {
-          const ipE = g.addEntity({ type: "IPv4Address", value: ip, properties: {} });
+          const ipE = g.ensureEntity({ type: "IPv4Address", value: ip, properties: {} });
           g.addLink({ from: dE.id, to: ipE.id, label: "A record", properties: {} });
           const asn = await asnLookup(ip);
           if (asn.ok) {
-            const asE = g.addEntity({
+            const asE = g.ensureEntity({
               type: "AS",
               value: String(asn.data.asn),
               properties: { organization: asn.data.organization ?? "" }

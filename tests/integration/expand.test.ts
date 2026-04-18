@@ -4,6 +4,7 @@ import { mkdtemp, rm, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { GraphRegistry } from "../../src/server/registry.js";
 import { expandToolHandlers } from "../../src/tools/expand.js";
+import { dnsLookup } from "../../src/lookups/dns.js";
 
 vi.mock("../../src/lookups/whois.js", () => ({
   whoisLookup: vi.fn().mockResolvedValue({
@@ -47,5 +48,23 @@ describe("integration: expand_domain writes a real .mtgx", () => {
     const values = g.allEntities().map((e) => e.value);
     expect(values).toContain("evil.example");
     expect(values).toContain("9.9.9.9");
+  });
+
+  it("handles multiple A records in the same ASN without duplicate errors", async () => {
+    vi.mocked(dnsLookup).mockResolvedValueOnce({
+      ok: true,
+      data: { domain: "multi.example", a: ["9.9.9.9", "9.9.9.10"], aaaa: [], mx: [], ns: [], txt: [] }
+    });
+    const tools = expandToolHandlers(reg);
+    const out = join(tmp, "multi.mtgx");
+    const result = await tools.maltego_expand_domain({ domain: "multi.example", outputPath: out });
+    const fstat = await stat(result.path);
+    expect(fstat.size).toBeGreaterThan(100);
+    const g = reg.getOrThrow(result.graphId);
+    // domain + registrar Phrase + 1 nameserver + 2 IPs + 1 shared AS = 6 entities at minimum
+    expect(g.entityCount()).toBeGreaterThanOrEqual(5);
+    // verify only one AS entity exists despite two A records sharing the ASN
+    const asEntities = g.allEntities().filter((e) => e.type === "maltego.AS");
+    expect(asEntities).toHaveLength(1);
   });
 });
