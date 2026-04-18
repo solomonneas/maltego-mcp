@@ -1,13 +1,29 @@
+import { access } from "node:fs/promises";
 import { GraphRegistry } from "../server/registry.js";
 import { writeMtgxFile } from "../graph/writer.js";
 import { whoisLookup } from "../lookups/whois.js";
 import { dnsLookup } from "../lookups/dns.js";
 import { asnLookup } from "../lookups/asn.js";
 import { confineToOutputDir } from "../server/paths.js";
+import { ToolFileSystemError } from "../server/errors.js";
 
-export interface ExpandIpInput { ip: string; outputPath: string; }
-export interface ExpandDomainInput { domain: string; outputPath: string; }
-export interface ExpandHashInput { hash: string; algorithm?: "md5" | "sha1" | "sha256" | "sha512"; outputPath: string; }
+export interface ExpandIpInput { ip: string; outputPath: string; overwrite?: boolean; }
+export interface ExpandDomainInput { domain: string; outputPath: string; overwrite?: boolean; }
+export interface ExpandHashInput { hash: string; algorithm?: "md5" | "sha1" | "sha256" | "sha512"; outputPath: string; overwrite?: boolean; }
+
+async function ensureWritable(path: string, overwrite: boolean): Promise<void> {
+  if (overwrite) return;
+  try {
+    await access(path);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return;
+    throw err;
+  }
+  throw new ToolFileSystemError(
+    `file already exists, refusing to overwrite (pass overwrite=true): ${path}`,
+    path
+  );
+}
 
 export function expandToolHandlers(reg: GraphRegistry, config: { outputDir: string }) {
   return {
@@ -30,6 +46,7 @@ export function expandToolHandlers(reg: GraphRegistry, config: { outputDir: stri
       }
 
       const outPath = confineToOutputDir(input.outputPath, config.outputDir);
+      await ensureWritable(outPath, input.overwrite ?? false);
       await writeMtgxFile(g, outPath);
       return { graphId: g.id, path: outPath, entityCount: g.entityCount(), linkCount: g.linkCount() };
     },
@@ -73,6 +90,7 @@ export function expandToolHandlers(reg: GraphRegistry, config: { outputDir: stri
       }
 
       const outPath = confineToOutputDir(input.outputPath, config.outputDir);
+      await ensureWritable(outPath, input.overwrite ?? false);
       await writeMtgxFile(g, outPath);
       return { graphId: g.id, path: outPath, entityCount: g.entityCount(), linkCount: g.linkCount() };
     },
@@ -85,6 +103,7 @@ export function expandToolHandlers(reg: GraphRegistry, config: { outputDir: stri
         properties: { algorithm: input.algorithm ?? "unknown" }
       });
       const outPath = confineToOutputDir(input.outputPath, config.outputDir);
+      await ensureWritable(outPath, input.overwrite ?? false);
       await writeMtgxFile(g, outPath);
       return { graphId: g.id, path: outPath, entityCount: g.entityCount(), linkCount: g.linkCount() };
     }

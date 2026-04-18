@@ -60,9 +60,9 @@ Restart Claude Desktop. The `maltego_*` tools should appear.
 - `maltego_crtsh(domain)` - certificate transparency entries
 
 **Convenience**
-- `maltego_expand_ip(ip, outputPath)` - IP + ASN + netblock, saved as `.mtgx`
-- `maltego_expand_domain(domain, outputPath)` - domain + whois + DNS + ASN per A record
-- `maltego_expand_hash(hash, outputPath, algorithm?)` - hash entity (extend in later versions)
+- `maltego_expand_ip(ip, outputPath, overwrite?)` - IP + ASN + netblock, saved as `.mtgx`
+- `maltego_expand_domain(domain, outputPath, overwrite?)` - domain + whois + DNS + ASN per A record
+- `maltego_expand_hash(hash, outputPath, algorithm?, overwrite?)` - hash entity (extend in later versions)
 
 ## Entity types
 

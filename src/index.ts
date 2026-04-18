@@ -45,9 +45,9 @@ const TOOL_DEFS = [
   { name: "maltego_dns", description: "Run a DNS lookup (A/AAAA/MX/NS/TXT).", inputSchema: { type: "object", properties: { domain: { type: "string" } }, required: ["domain"] } },
   { name: "maltego_asn", description: "Look up ASN / netblock / org for an IP via Team Cymru.", inputSchema: { type: "object", properties: { ip: { type: "string" } }, required: ["ip"] } },
   { name: "maltego_crtsh", description: "Certificate Transparency search via crt.sh.", inputSchema: { type: "object", properties: { domain: { type: "string" } }, required: ["domain"] } },
-  { name: "maltego_expand_ip", description: "Build a .mtgx graph around an IP (ASN, netblock).", inputSchema: { type: "object", properties: { ip: { type: "string" }, outputPath: { type: "string" } }, required: ["ip", "outputPath"] } },
-  { name: "maltego_expand_domain", description: "Build a .mtgx graph around a domain (whois, DNS, ASN of A records).", inputSchema: { type: "object", properties: { domain: { type: "string" }, outputPath: { type: "string" } }, required: ["domain", "outputPath"] } },
-  { name: "maltego_expand_hash", description: "Build a .mtgx graph with a Hash entity (extend later).", inputSchema: { type: "object", properties: { hash: { type: "string" }, algorithm: { type: "string", enum: ["md5", "sha1", "sha256", "sha512"] }, outputPath: { type: "string" } }, required: ["hash", "outputPath"] } }
+  { name: "maltego_expand_ip", description: "Build a .mtgx graph around an IP (ASN, netblock).", inputSchema: { type: "object", properties: { ip: { type: "string" }, outputPath: { type: "string" }, overwrite: { type: "boolean" } }, required: ["ip", "outputPath"] } },
+  { name: "maltego_expand_domain", description: "Build a .mtgx graph around a domain (whois, DNS, ASN of A records).", inputSchema: { type: "object", properties: { domain: { type: "string" }, outputPath: { type: "string" }, overwrite: { type: "boolean" } }, required: ["domain", "outputPath"] } },
+  { name: "maltego_expand_hash", description: "Build a .mtgx graph with a Hash entity (extend later).", inputSchema: { type: "object", properties: { hash: { type: "string" }, algorithm: { type: "string", enum: ["md5", "sha1", "sha256", "sha512"] }, outputPath: { type: "string" }, overwrite: { type: "boolean" } }, required: ["hash", "outputPath"] } }
 ];
 
 const server = new Server(

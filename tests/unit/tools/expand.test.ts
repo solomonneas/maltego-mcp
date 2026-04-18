@@ -44,4 +44,15 @@ describe("maltego_expand_domain", () => {
     expect(values).toContain("9.9.9.9");
     await rm(tmp, { recursive: true, force: true });
   });
+
+  it("maltego_expand_domain refuses overwrite by default, succeeds with flag", async () => {
+    const tools = expandToolHandlers(reg, { outputDir: tmp });
+    const out = join(tmp, "evil.mtgx");
+    await tools.maltego_expand_domain({ domain: "evil.example", outputPath: out });
+    await expect(
+      tools.maltego_expand_domain({ domain: "evil.example", outputPath: out })
+    ).rejects.toThrow(/exists/);
+    await tools.maltego_expand_domain({ domain: "evil.example", outputPath: out, overwrite: true });
+    await rm(tmp, { recursive: true, force: true });
+  });
 });
