@@ -114,7 +114,8 @@ export async function writeMtgxBytes(graph: Graph): Promise<Uint8Array> {
     ignoreAttributes: false,
     attributeNamePrefix: "@_",
     format: true,
-    suppressEmptyNode: false
+    suppressEmptyNode: false,
+    suppressBooleanAttributes: false
   });
   const xml = builder.build(doc);
 

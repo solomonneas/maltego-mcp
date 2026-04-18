@@ -51,4 +51,15 @@ describe("writeMtgxBytes", () => {
     expect(bytes.byteLength).toBeGreaterThan(0);
     expect(g.allEntities()[0].position).toBeDefined();
   });
+
+  it("produces valid XML (no bare boolean attributes)", async () => {
+    const { XMLValidator } = await import("fast-xml-parser");
+    const g = new Graph("g-1", "t");
+    g.addEntity({ type: "Domain", value: "a.com", properties: { foo: "bar" } });
+    const bytes = await writeMtgxBytes(g);
+    const zip = await JSZip.loadAsync(bytes);
+    const xml = await zip.file("Graphs/Graph1.graphml")!.async("string");
+    const validation = XMLValidator.validate(xml);
+    expect(validation).toBe(true);
+  });
 });
