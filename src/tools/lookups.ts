@@ -3,7 +3,8 @@ import { dnsLookup } from "../lookups/dns.js";
 import { asnLookup } from "../lookups/asn.js";
 import { crtshLookup } from "../lookups/crtsh.js";
 
-export function lookupToolHandlers() {
+export function lookupToolHandlers(config?: { lookupTimeoutMs?: number }) {
+  const timeoutMs = config?.lookupTimeoutMs ?? 30_000;
   return {
     async maltego_whois(input: { domain: string }) {
       return whoisLookup(input.domain);
@@ -15,7 +16,7 @@ export function lookupToolHandlers() {
       return asnLookup(input.ip);
     },
     async maltego_crtsh(input: { domain: string }) {
-      return crtshLookup(input.domain);
+      return crtshLookup(input.domain, timeoutMs);
     }
   };
 }

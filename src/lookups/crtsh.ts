@@ -17,11 +17,11 @@ export interface CrtshData {
   certs: CrtshCert[];
 }
 
-export async function crtshLookup(domain: string): Promise<LookupOutcome<CrtshData>> {
+export async function crtshLookup(domain: string, timeoutMs: number = 30_000): Promise<LookupOutcome<CrtshData>> {
   const url = `https://crt.sh/?q=${encodeURIComponent(domain)}&output=json`;
   let res;
   try {
-    res = await request(url, { method: "GET", headersTimeout: 30_000, bodyTimeout: 30_000 });
+    res = await request(url, { method: "GET", headersTimeout: timeoutMs, bodyTimeout: timeoutMs });
   } catch (err) {
     return {
       ok: false,
@@ -37,7 +37,7 @@ export async function crtshLookup(domain: string): Promise<LookupOutcome<CrtshDa
       ok: false,
       error: "crt.sh rate limited",
       retriable: true,
-      retryAfterMs: Number.isFinite(seconds) ? seconds * 1000 : 30_000
+      retryAfterMs: Number.isFinite(seconds) ? seconds * 1000 : timeoutMs
     };
   }
   if (res.statusCode >= 400) {

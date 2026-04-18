@@ -15,7 +15,7 @@ import { toToolResponse } from "./server/errors.js";
 const config = loadConfig();
 const registry = new GraphRegistry();
 const graph = graphToolHandlers(registry);
-const lookup = lookupToolHandlers();
+const lookup = lookupToolHandlers({ lookupTimeoutMs: config.lookupTimeoutMs });
 const expand = expandToolHandlers(registry);
 
 type Handler = (args: unknown) => Promise<unknown>;
