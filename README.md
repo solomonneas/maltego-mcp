@@ -48,7 +48,7 @@ Restart Claude Desktop. The `maltego_*` tools should appear.
 
 **Graph authoring**
 - `maltego_create_graph(name)` - returns graphId
-- `maltego_add_entity(graphId, type, value, properties?, notes?)` - returns entityId
+- `maltego_add_entity(graphId, type, value, properties?)` - returns entityId
 - `maltego_add_link(graphId, from, to, label?, properties?)` - returns linkId
 - `maltego_save_graph(graphId, path, overwrite?)` - writes `.mtgx`
 - `maltego_load_graph(path)` - parses existing `.mtgx` into a new handle
