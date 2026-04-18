@@ -1,0 +1,3 @@
+[
+  {"issuer_ca_id":16418,"issuer_name":"C=US, O=DigiCert Inc, CN=DigiCert TLS RSA SHA256 2020 CA1","common_name":"www.example.com","name_value":"*.example.com\nexample.com","id":12345678,"entry_timestamp":"2023-01-15T12:34:56","not_before":"2023-01-15T00:00:00","not_after":"2024-01-15T23:59:59","serial_number":"0abc"}
+]
