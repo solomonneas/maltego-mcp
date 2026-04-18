@@ -6,7 +6,6 @@ export interface AddEntityInput {
   value: string;
   properties?: Record<string, string>;
   position?: Position;
-  notes?: string;
 }
 
 export interface AddLinkInput {
@@ -42,8 +41,7 @@ export class Graph {
       type,
       value: input.value,
       properties: input.properties ?? {},
-      position: input.position,
-      notes: input.notes
+      position: input.position
     };
     this.entities.set(id, entity);
     this.entityKey.add(key);

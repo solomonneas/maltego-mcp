@@ -13,7 +13,6 @@ export interface Entity {
   value: string;
   properties: Record<string, string>;
   position?: Position;
-  notes?: string;
 }
 
 export interface Link {

@@ -37,7 +37,7 @@ const HANDLERS: Record<string, Handler> = {
 
 const TOOL_DEFS = [
   { name: "maltego_create_graph", description: "Create a new empty Maltego graph. Returns graphId.", inputSchema: { type: "object", properties: { name: { type: "string" } }, required: ["name"] } },
-  { name: "maltego_add_entity", description: "Add an entity (node) to a graph.", inputSchema: { type: "object", properties: { graphId: { type: "string" }, type: { type: "string" }, value: { type: "string" }, properties: { type: "object" }, notes: { type: "string" } }, required: ["graphId", "type", "value"] } },
+  { name: "maltego_add_entity", description: "Add an entity (node) to a graph.", inputSchema: { type: "object", properties: { graphId: { type: "string" }, type: { type: "string" }, value: { type: "string" }, properties: { type: "object" } }, required: ["graphId", "type", "value"] } },
   { name: "maltego_add_link", description: "Add a directed link between two entities.", inputSchema: { type: "object", properties: { graphId: { type: "string" }, from: { type: "string" }, to: { type: "string" }, label: { type: "string" }, properties: { type: "object" } }, required: ["graphId", "from", "to"] } },
   { name: "maltego_save_graph", description: "Save a graph to a .mtgx file.", inputSchema: { type: "object", properties: { graphId: { type: "string" }, path: { type: "string" }, overwrite: { type: "boolean" } }, required: ["graphId", "path"] } },
   { name: "maltego_load_graph", description: "Load an existing .mtgx into a new graph handle.", inputSchema: { type: "object", properties: { path: { type: "string" } }, required: ["path"] } },

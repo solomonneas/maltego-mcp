@@ -11,7 +11,6 @@ export interface AddEntityInput {
   type: string;
   value: string;
   properties?: Record<string, string>;
-  notes?: string;
 }
 export interface AddLinkInput {
   graphId: string;
@@ -62,8 +61,7 @@ export function graphToolHandlers(reg: GraphRegistry) {
       const entity = g.addEntity({
         type: input.type,
         value: input.value,
-        properties: input.properties ?? {},
-        notes: input.notes
+        properties: input.properties ?? {}
       });
       return { entityId: entity.id, type: entity.type, value: entity.value };
     },
