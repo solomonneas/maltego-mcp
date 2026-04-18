@@ -97,4 +97,25 @@ export class Graph {
       links: this.allLinks()
     };
   }
+
+  applyLayout(): void {
+    const columnSpacing = 240;
+    const rowSpacing = 140;
+    const columnByType = new Map<string, number>();
+    const rowByType = new Map<string, number>();
+    for (const entity of this.entities.values()) {
+      if (entity.position) continue;
+      let col = columnByType.get(entity.type);
+      if (col === undefined) {
+        col = columnByType.size;
+        columnByType.set(entity.type, col);
+      }
+      const row = rowByType.get(entity.type) ?? 0;
+      rowByType.set(entity.type, row + 1);
+      entity.position = {
+        x: col * columnSpacing,
+        y: row * rowSpacing
+      };
+    }
+  }
 }
