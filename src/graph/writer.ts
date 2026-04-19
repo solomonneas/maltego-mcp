@@ -121,7 +121,7 @@ export async function writeMtgxBytes(graph: Graph): Promise<Uint8Array> {
 
   const zip = new JSZip();
   zip.file("Graphs/Graph1.graphml", xml);
-  zip.file("version.properties", "maltego.graph.version=1.5\nmaltego.client.version=4.11\n");
+  zip.file("version.properties", "maltego.graph.version=1.3\nmaltego.client.version=4.11\n");
   return zip.generateAsync({ type: "uint8array" });
 }
 
