@@ -15,3 +15,7 @@ transforms/.mypy_cache/
 transforms/.ruff_cache/
 __pycache__/
 *.pyc
+
+# Local brigade memory (cards are local-only, never committed)
+/memory/
+.brigade/
