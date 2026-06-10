@@ -1,0 +1,15 @@
+#!/bin/bash
+# Single verification entrypoint. AGENTS.md's Definition of Done defers to
+# this file, so the unconditional gate lives in exactly one place.
+#
+# Conditional gates (run manually when applicable, per AGENTS.md):
+# - `npm run test:all` when the change touches anything integration tests
+#   cover (graph round-trip, expanders, demo, lookups). `npm test` runs
+#   tests/unit only.
+# - `npm run test:transforms` for Phase B changes under `transforms/`
+#   (requires `npm run setup:transforms` once to create transforms/.venv).
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+npm run typecheck
+npm test

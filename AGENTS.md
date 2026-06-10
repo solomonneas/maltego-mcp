@@ -7,9 +7,13 @@ transforms under `transforms/`, bundled into a `.mtz` that adds right-click
 pivots into MISP, TheHive, Cortex, and a bundled MITRE ATT&CK dataset.
 
 ## Definition of Done
+```bash
+./scripts/verify
+```
+Runs the unconditional gates in order: `npm run typecheck`, `npm test`.
+
 Before reporting any substantive code change complete, run and pass ALL of:
-- `npm run typecheck`
-- `npm test`
+- `./scripts/verify`
 - `npm run test:all` when the change touches anything integration tests cover
   (graph round-trip, expanders, demo, lookups). `npm test` runs `tests/unit`
   only; passing it does NOT validate integration changes.
