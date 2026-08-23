@@ -57,7 +57,7 @@ class TheHiveObservableToCases(DiscoverableTransform):
                     "Authorization": f"Bearer {api_key}",
                     "Accept": "application/json",
                 },
-                verify=cfg.thehive.verify_ssl,
+                verify=cfg.thehive.ca_bundle or cfg.thehive.verify_ssl,
             )
         except HttpError as exc:
             cat, msg = classify_for_uimessage(cls._classify(str(exc)))

@@ -4,15 +4,27 @@ import { randomUUID } from "node:crypto";
 
 export class GraphRegistry {
   private map = new Map<GraphId, Graph>();
+  private readonly maxGraphs: number;
+
+  constructor({ maxGraphs = 100 }: { maxGraphs?: number } = {}) {
+    this.maxGraphs = maxGraphs;
+  }
+
+  private assertCapacity(id: GraphId): void {
+    if (this.map.has(id)) throw new Error(`graphId collision: ${id}`);
+    if (this.map.size >= this.maxGraphs) throw new Error("resource limit: maximum graphs reached");
+  }
 
   create(name: string): Graph {
-    const id = `g-${randomUUID().slice(0, 8)}`;
+    this.assertCapacity("new");
+    const id = `g-${randomUUID()}`;
     const g = new Graph(id, name);
     this.map.set(id, g);
     return g;
   }
 
   register(graph: Graph): void {
+    this.assertCapacity(graph.id);
     this.map.set(graph.id, graph);
   }
 
@@ -31,4 +43,6 @@ export class GraphRegistry {
   allIds(): GraphId[] {
     return [...this.map.keys()];
   }
+
+  dispose(id: GraphId): boolean { return this.map.delete(id); }
 }

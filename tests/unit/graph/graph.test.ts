@@ -2,6 +2,11 @@ import { describe, it, expect } from "vitest";
 import { Graph } from "../../../src/graph/graph.js";
 
 describe("Graph", () => {
+  it("rejects entities over the configured graph quota", () => {
+    const g = new Graph("g-limit", "limited", { maxEntities: 1 });
+    g.addEntity({ type: "Domain", value: "one.example", properties: {} });
+    expect(() => g.addEntity({ type: "Domain", value: "two.example", properties: {} })).toThrow(/resource limit/i);
+  });
   it("creates empty graph with name", () => {
     const g = new Graph("g-1", "test-graph");
     expect(g.id).toBe("g-1");

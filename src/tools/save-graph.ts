@@ -1,4 +1,3 @@
-import { access } from "node:fs/promises";
 import { Type, type Static } from "@sinclair/typebox";
 import { z } from "zod";
 import type { GraphRegistry } from "../server/registry.js";
@@ -24,10 +23,6 @@ export const mcpInputShape = {
   overwrite: z.boolean().optional(),
 };
 
-async function pathExists(path: string): Promise<boolean> {
-  try { await access(path); return true; } catch { return false; }
-}
-
 export interface ToolDeps { registry: GraphRegistry; config: MaltegoConfig; }
 
 export function createSaveGraphTool(deps: ToolDeps) {
@@ -40,13 +35,7 @@ export function createSaveGraphTool(deps: ToolDeps) {
       const input = raw as Input;
       const g = deps.registry.getOrThrow(input.graphId);
       const resolved = confineToOutputDir(input.path, deps.config.outputDir);
-      if (!input.overwrite && (await pathExists(resolved))) {
-        throw new ToolFileSystemError(
-          `file already exists, refusing to overwrite (pass overwrite=true): ${resolved}`,
-          resolved,
-        );
-      }
-      try { await writeMtgxFile(g, resolved); }
+      try { await writeMtgxFile(g, resolved, input.overwrite === true); }
       catch (err) {
         throw new ToolFileSystemError(
           `failed to write .mtgx: ${(err as Error).message}`,

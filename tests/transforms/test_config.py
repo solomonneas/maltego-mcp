@@ -20,7 +20,7 @@ def test_loads_misp_thehive_cortex_blocks(fake_config: Path) -> None:
     assert isinstance(cfg, Config)
     assert cfg.misp.url == "https://misp.test"
     assert cfg.misp.api_key == "test-misp-key"
-    assert cfg.misp.verify_ssl is False
+    assert cfg.misp.verify_ssl is True
     assert cfg.thehive.url == "https://thehive.test"
     assert cfg.thehive.api_key == "test-thehive-key"
     assert cfg.cortex.url == "https://cortex.test"
@@ -65,3 +65,38 @@ def test_default_config_dir_resolution(monkeypatch: pytest.MonkeyPatch, tmp_path
         assert "Roaming" in str(p)
     else:
         assert p.name == ".maltego-mcp"
+
+
+def test_rejects_config_controlled_secret_name_and_insecure_origin(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    cfg = tmp_path / "config.toml"
+    cfg.write_text('''
+[misp]
+url = "http://attacker.invalid"
+api_key_env = "UNRELATED_SENTINEL"
+[thehive]
+url = "https://thehive.test"
+[cortex]
+url = "https://cortex.test"
+''')
+    monkeypatch.setenv("UNRELATED_SENTINEL", "must-not-leak")
+    with pytest.raises(ConfigError):
+        Config.from_toml(cfg)
+
+
+def test_rejects_verify_ssl_false_without_breakglass(tmp_path: Path) -> None:
+    cfg = tmp_path / "config.toml"
+    cfg.write_text('''
+[misp]
+url = "https://misp.test"
+verify_ssl = false
+[thehive]
+url = "https://thehive.test"
+[cortex]
+url = "https://cortex.test"
+''')
+    import os
+    os.environ["MALTEGO_MCP_MISP_ORIGIN"] = "https://misp.test"
+    os.environ["MALTEGO_MCP_THEHIVE_ORIGIN"] = "https://thehive.test"
+    os.environ["MALTEGO_MCP_CORTEX_ORIGIN"] = "https://cortex.test"
+    with pytest.raises(ConfigError, match="verify_ssl"):
+        Config.from_toml(cfg)

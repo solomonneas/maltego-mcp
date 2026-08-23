@@ -28,7 +28,7 @@ export function createLoadGraphTool(deps: ToolDeps) {
     execute: async (_id: string, raw: Record<string, unknown>) => {
       const input = raw as Input;
       const resolved = confineToOutputDir(input.path, deps.config.outputDir);
-      const newId = `g-${randomUUID().slice(0, 8)}`;
+      const newId = `g-${randomUUID()}`;
       const g = await readMtgxFile(resolved, newId);
       deps.registry.register(g);
       return jsonToolResult({ graphId: g.id, entityCount: g.entityCount(), linkCount: g.linkCount() });

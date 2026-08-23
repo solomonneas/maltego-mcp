@@ -15,6 +15,20 @@ export interface AddLinkInput {
   properties?: Record<string, string>;
 }
 
+export interface GraphLimits {
+  maxEntities?: number;
+  maxLinks?: number;
+  maxProperties?: number;
+  maxStringLength?: number;
+}
+
+const DEFAULT_LIMITS: Required<GraphLimits> = {
+  maxEntities: 10_000,
+  maxLinks: 20_000,
+  maxProperties: 100,
+  maxStringLength: 8_192,
+};
+
 export class Graph {
   readonly id: GraphId;
   name: string;
@@ -23,13 +37,24 @@ export class Graph {
   private entityKey = new Set<string>();
   private nextEntityNum = 1;
   private nextLinkNum = 1;
+  private readonly limits: Required<GraphLimits>;
 
-  constructor(id: GraphId, name: string) {
+  constructor(id: GraphId, name: string, limits: GraphLimits = {}) {
     this.id = id;
     this.name = name;
+    this.limits = { ...DEFAULT_LIMITS, ...limits };
+  }
+
+  private validateStrings(values: Array<string | undefined>, properties: Record<string, string> | undefined): void {
+    if (values.some((value) => (value?.length ?? 0) > this.limits.maxStringLength)) throw new Error("resource limit: string too long");
+    const entries = Object.entries(properties ?? {});
+    if (entries.length > this.limits.maxProperties) throw new Error("resource limit: too many properties");
+    if (entries.some(([key, value]) => key.length > this.limits.maxStringLength || value.length > this.limits.maxStringLength)) throw new Error("resource limit: property string too long");
   }
 
   addEntity(input: AddEntityInput): Entity {
+    if (this.entities.size >= this.limits.maxEntities) throw new Error("resource limit: maximum entities reached");
+    this.validateStrings([input.type, input.value], input.properties);
     const type = normalizeEntityType(input.type);
     const key = `${type}::${input.value}`;
     if (this.entityKey.has(key)) {
@@ -62,6 +87,8 @@ export class Graph {
   }
 
   addLink(input: AddLinkInput): Link {
+    if (this.links.size >= this.limits.maxLinks) throw new Error("resource limit: maximum links reached");
+    this.validateStrings([input.label], input.properties);
     if (!this.entities.has(input.from)) {
       throw new Error(`unknown entity on link.from: ${input.from}`);
     }

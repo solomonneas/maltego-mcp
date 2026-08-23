@@ -125,10 +125,26 @@ export async function writeMtgxBytes(graph: Graph): Promise<Uint8Array> {
   return zip.generateAsync({ type: "uint8array" });
 }
 
-export async function writeMtgxFile(graph: Graph, path: string): Promise<void> {
-  const { writeFile, mkdir } = await import("node:fs/promises");
+export async function writeMtgxFile(graph: Graph, path: string, overwrite = false): Promise<void> {
+  const { mkdir, open, lstat, rename, unlink } = await import("node:fs/promises");
   const { dirname } = await import("node:path");
   const bytes = await writeMtgxBytes(graph);
   await mkdir(dirname(path), { recursive: true });
-  await writeFile(path, bytes);
+  try { if ((await lstat(path)).isSymbolicLink()) throw new Error("refusing to write through symlink"); } catch (err: any) { if (err.code !== "ENOENT") throw err; }
+  if (!overwrite) {
+    const handle = await open(path, "wx");
+    try { await handle.writeFile(bytes); } finally { await handle.close(); }
+    return;
+  }
+  const temporary = `${path}.tmp-${process.pid}-${Date.now()}`;
+  const handle = await open(temporary, "wx");
+  try {
+    await handle.writeFile(bytes);
+    await handle.close();
+    await rename(temporary, path);
+  } catch (err) {
+    await handle.close().catch(() => undefined);
+    await unlink(temporary).catch(() => undefined);
+    throw err;
+  }
 }

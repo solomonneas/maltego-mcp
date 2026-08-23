@@ -16,16 +16,17 @@ Configure backends. Create `%APPDATA%\maltego-mcp\config.toml` (Windows) or
 ```toml
 [misp]
 url = "https://misp.local"
-api_key_env = "MISP_API_KEY"
-verify_ssl = false
+# MISP_API_KEY is read from the fixed environment variable.
 
 [thehive]
 url = "https://thehive.local"
-api_key_env = "THEHIVE_API_KEY"
+# THEHIVE_API_KEY is read from the fixed environment variable.
 
 [cortex]
 url = "https://cortex.local"
-api_key_env = "CORTEX_API_KEY"
+# CORTEX_API_KEY is read from the fixed environment variable.
+allowed_analyzers = ["VirusTotal_GetReport_3_1"]
+max_analyzers_per_run = 1
 
 [network]
 timeout_s = 30
@@ -35,7 +36,10 @@ Set the corresponding env vars in the shell that launches Maltego:
 
 ```powershell
 [Environment]::SetEnvironmentVariable("MISP_API_KEY", "<your key>", "User")
+[Environment]::SetEnvironmentVariable("MALTEGO_MCP_MISP_ORIGIN", "https://misp.local", "User")
 ```
+
+Set `MALTEGO_MCP_THEHIVE_ORIGIN` and `MALTEGO_MCP_CORTEX_ORIGIN` to their exact HTTPS origins too. These bindings must be managed separately from `config.toml`. TLS verification stays enabled by default. For private PKI, set `ca_bundle` to the CA bundle path. `verify_ssl = false` needs the separate `MALTEGO_MCP_ALLOW_INSECURE_TLS=1` break-glass gate.
 
 Restart Maltego after setting env vars.
 

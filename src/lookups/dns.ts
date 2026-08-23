@@ -8,13 +8,16 @@ export interface DnsData {
   mx: { exchange: string; priority: number }[];
   ns: string[];
   txt: string[];
+  warnings?: string[];
 }
 
-async function safe<T>(promise: Promise<T>, fallback: T): Promise<T> {
+async function safe<T>(promise: Promise<T>, fallback: T): Promise<{ value: T; error?: string }> {
   try {
-    return await promise;
-  } catch {
-    return fallback;
+    return { value: await promise };
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException).code;
+    if (code === "ENODATA" || code === "ENOTFOUND") return { value: fallback };
+    return { value: fallback, error: code ?? (err as Error).message };
   }
 }
 
@@ -27,15 +30,19 @@ export async function dnsLookup(domain: string): Promise<LookupOutcome<DnsData>>
       safe(resolveNs(domain), [] as string[]),
       safe(resolveTxt(domain), [] as string[][])
     ]);
+    const results = [a, aaaa, mx, ns, txt];
+    if (results.every((result) => result.error)) return { ok: false, error: `dns lookup operational failure: ${results.map((r) => r.error).join(", ")}`, retriable: true };
+    const warnings = results.flatMap((result) => result.error ? [`DNS query failed: ${result.error}`] : []);
     return {
       ok: true,
       data: {
         domain,
-        a,
-        aaaa,
-        mx,
-        ns,
-        txt: txt.flat()
+        a: a.value,
+        aaaa: aaaa.value,
+        mx: mx.value,
+        ns: ns.value,
+        txt: txt.value.flat(),
+        ...(warnings.length ? { warnings } : {})
       }
     };
   } catch (err) {

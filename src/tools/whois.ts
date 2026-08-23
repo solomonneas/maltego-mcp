@@ -6,12 +6,12 @@ import { whoisLookup } from "../lookups/whois.js";
 import { jsonToolResult } from "./_shared.js";
 
 const Schema = Type.Object(
-  { domain: Type.String() },
+  { domain: Type.String({ maxLength: 253 }) },
   { additionalProperties: false },
 );
 type Input = Static<typeof Schema>;
 
-export const mcpInputShape = { domain: z.string() };
+export const mcpInputShape = { domain: z.string().max(253) };
 
 export interface ToolDeps { registry: GraphRegistry; config: MaltegoConfig; }
 
@@ -23,7 +23,7 @@ export function createWhoisTool(_deps: ToolDeps) {
     parameters: Schema,
     execute: async (_id: string, raw: Record<string, unknown>) => {
       const input = raw as Input;
-      return jsonToolResult(await whoisLookup(input.domain));
+      return jsonToolResult(await whoisLookup(input.domain, _deps.config.lookupTimeoutMs));
     },
   };
 }

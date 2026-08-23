@@ -4,6 +4,13 @@ import { createCreateGraphTool } from "../../../src/tools/create-graph.js";
 import { resolveConfig } from "../../../src/config.js";
 
 describe("create-graph tool", () => {
+  it("rejects graph creation above the registry resource limit", async () => {
+    const registry = new GraphRegistry({ maxGraphs: 100 });
+    const tool = createCreateGraphTool({ registry, config: resolveConfig({}) });
+    for (let i = 0; i < 100; i++) await tool.execute("test", { name: `graph-${i}` });
+    await expect(tool.execute("test", { name: "one-too-many" })).rejects.toThrow(/resource limit/i);
+    expect(registry.allIds()).toHaveLength(100);
+  });
   let registry: GraphRegistry;
   beforeEach(() => {
     registry = new GraphRegistry();

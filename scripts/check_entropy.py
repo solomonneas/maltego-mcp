@@ -9,6 +9,7 @@ from __future__ import annotations
 import math
 import os
 import re
+import hashlib
 import zipfile
 from pathlib import Path
 
@@ -33,9 +34,11 @@ def shannon_entropy(s: str) -> float:
 
 def _scan_text(name: str, text: str) -> list[str]:
     hits: list[str] = []
-    for token in TOKEN_RE.findall(text):
+    for match in TOKEN_RE.finditer(text):
+        token = match.group(0)
         if shannon_entropy(token) >= ENTROPY_THRESHOLD:
-            hits.append(f"{name}: {token[:8]}...{token[-4:]} (len={len(token)})")
+            digest = hashlib.sha256(token.encode("utf-8")).hexdigest()[:12]
+            hits.append(f"{name}: offset={match.start()} len={len(token)} rule=high-entropy sha256={digest}")
     return hits
 
 

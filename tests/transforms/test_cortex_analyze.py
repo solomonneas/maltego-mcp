@@ -15,7 +15,7 @@ FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def _request(value: str, entity_type: str):
-    return SimpleNamespace(Value=value, Type=entity_type, Properties={})
+    return SimpleNamespace(Value=value, Type=entity_type, Properties={"maltego-mcp.cortex-run-capability": "test-capability"})
 
 
 def test_emits_verdict_per_applicable_analyzer(

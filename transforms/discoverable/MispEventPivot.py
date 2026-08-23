@@ -52,7 +52,7 @@ class MispEventPivot(DiscoverableTransform):
                 f"{cfg.misp.url}/attributes/restSearch",
                 json_body={"value": request.Value, "limit": 50},
                 headers={"Authorization": api_key, "Accept": "application/json"},
-                verify=cfg.misp.verify_ssl,
+                verify=cfg.misp.ca_bundle or cfg.misp.verify_ssl,
             )
         except HttpError as exc:
             cat, msg = classify_for_uimessage(cls._classify(str(exc)))

@@ -38,15 +38,18 @@ def test_dispatch_runs_named_transform(venv_python: Path, tmp_path: Path) -> Non
     cfg_dir = tmp_path / "maltego-mcp"
     cfg_dir.mkdir()
     (cfg_dir / "config.toml").write_text(
-        '[misp]\nurl = "https://nope.invalid"\napi_key_env = "MISP_API_KEY"\n'
-        '[thehive]\nurl = "https://nope"\napi_key_env = "THEHIVE_API_KEY"\n'
-        '[cortex]\nurl = "https://nope"\napi_key_env = "CORTEX_API_KEY"\n'
+        '[misp]\nurl = "https://nope.invalid"\n'
+        '[thehive]\nurl = "https://thehive.invalid"\n'
+        '[cortex]\nurl = "https://cortex.invalid"\n'
         '[network]\ntimeout_s = 2\n'
     )
     env = {
         **os.environ,
         "MALTEGO_MCP_CONFIG_DIR": str(cfg_dir),
         "MISP_API_KEY": "k",
+        "MALTEGO_MCP_MISP_ORIGIN": "https://nope.invalid",
+        "MALTEGO_MCP_THEHIVE_ORIGIN": "https://thehive.invalid",
+        "MALTEGO_MCP_CORTEX_ORIGIN": "https://cortex.invalid",
         "PYTHONPATH": str(REPO_ROOT),
     }
 

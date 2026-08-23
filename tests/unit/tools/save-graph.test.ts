@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { tmpdir } from "node:os";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { GraphRegistry } from "../../../src/server/registry.js";
 import { createSaveGraphTool } from "../../../src/tools/save-graph.js";
@@ -34,5 +34,18 @@ describe("save-graph tool", () => {
     g.addEntity({ type: "Domain", value: "a.com", properties: {} });
     const outside = resolve(tmp, "..", "escapes.mtgx");
     await expect(tool.execute("t", { graphId: g.id, path: outside })).rejects.toThrow(/outside the configured output directory/);
+  });
+
+  it("rejects a symlinked child path without changing its target", async () => {
+    const outside = await mkdtemp(join(tmpdir(), "maltego-mcp-outside-"));
+    await symlink(outside, join(tmp, "link"));
+    const target = join(outside, "test.mtgx");
+    await writeFile(target, "unchanged");
+    const tool = createSaveGraphTool({ registry, config: resolveConfig({ pluginConfig: { outputDir: tmp } }) });
+    const g = registry.create("symlink");
+    g.addEntity({ type: "Domain", value: "a.com", properties: {} });
+    await expect(tool.execute("t", { graphId: g.id, path: "link/test.mtgx", overwrite: true })).rejects.toThrow(/symlink/i);
+    await expect(readFile(target, "utf8")).resolves.toBe("unchanged");
+    await rm(outside, { recursive: true, force: true });
   });
 });

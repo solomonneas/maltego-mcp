@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Harden graph file confinement, archive parsing, long-lived graph state, and lookup response budgets.
+- Require protected backend origin bindings, fixed credential variables, TLS verification, and explicit Cortex analyzer authorization.
+- Upgrade Undici to 6.27.0 and redact entropy-scan findings.
+
 ## 0.4.0 - 2026-05-31
 
 ### Added

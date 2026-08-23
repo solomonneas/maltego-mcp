@@ -52,7 +52,7 @@
     "@sinclair/typebox": "^0.34.49",
     "fast-xml-parser": "^5.7.3",
     "jszip": "^3.10.1",
-    "undici": "^6.26.0",
+    "undici": "^6.27.0",
     "whois": "^2.14.0",
     "zod": "^4.4.2"
   },

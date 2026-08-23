@@ -32,6 +32,14 @@ describe("readMtgxBytes", () => {
     await expect(readMtgxBytes(bytes, "g-x")).rejects.toThrow(/Graph1\.graphml/);
   });
 
+  it("rejects an archive whose GraphML expands beyond the byte ceiling", async () => {
+    const JSZip = (await import("jszip")).default;
+    const zip = new JSZip();
+    zip.file("Graphs/Graph1.graphml", `<graphml><graph>${"x".repeat(1_100_000)}</graph></graphml>`);
+    const bytes = await zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
+    await expect(readMtgxBytes(bytes, "g-x")).rejects.toThrow(/GraphML|resource limit/i);
+  });
+
   it("preserves entity positions across round-trip", async () => {
     const original = new Graph("g-1", "rt");
     const a = original.addEntity({ type: "Domain", value: "a.com", properties: {}, position: { x: 100, y: 200 } });

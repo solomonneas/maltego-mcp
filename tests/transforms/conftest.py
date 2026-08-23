@@ -19,16 +19,14 @@ def fake_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[Pat
         """
 [misp]
 url = "https://misp.test"
-api_key_env = "MISP_API_KEY"
-verify_ssl = false
 
 [thehive]
 url = "https://thehive.test"
-api_key_env = "THEHIVE_API_KEY"
 
 [cortex]
 url = "https://cortex.test"
-api_key_env = "CORTEX_API_KEY"
+allowed_analyzers = ["VirusTotal_GetReport_3_1", "AbuseIPDB_1_0"]
+max_analyzers_per_run = 2
 
 [network]
 timeout_s = 5
@@ -38,6 +36,10 @@ timeout_s = 5
     monkeypatch.setenv("MISP_API_KEY", "test-misp-key")
     monkeypatch.setenv("THEHIVE_API_KEY", "test-thehive-key")
     monkeypatch.setenv("CORTEX_API_KEY", "test-cortex-key")
+    monkeypatch.setenv("MALTEGO_MCP_MISP_ORIGIN", "https://misp.test")
+    monkeypatch.setenv("MALTEGO_MCP_THEHIVE_ORIGIN", "https://thehive.test")
+    monkeypatch.setenv("MALTEGO_MCP_CORTEX_ORIGIN", "https://cortex.test")
+    monkeypatch.setenv("MALTEGO_MCP_CORTEX_RUN_CAPABILITY", "test-capability")
     yield cfg_path
 
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 
 from maltego_trx.entities import Phrase
 from maltego_trx.transform import DiscoverableTransform
@@ -56,6 +57,14 @@ class CortexAnalyze(DiscoverableTransform):
             response.addUIMessage(msg, cat)
             return
 
+        capability = request.Properties.get("maltego-mcp.cortex-run-capability")
+        if not capability or capability != os.environ.get("MALTEGO_MCP_CORTEX_RUN_CAPABILITY"):
+            response.addUIMessage("Cortex analysis requires caller authorization", "Inform")
+            return
+        if not cfg.cortex_allowed_analyzers or cfg.cortex_max_analyzers_per_run <= 0:
+            response.addUIMessage("Cortex analyzer policy denies all runs", "Inform")
+            return
+
         client = HttpClient(cfg)
         headers = {
             "Authorization": f"Bearer {api_key}",
@@ -66,14 +75,14 @@ class CortexAnalyze(DiscoverableTransform):
             analyzers = client.get_json(
                 f"{cfg.cortex.url}/api/analyzer",
                 headers=headers,
-                verify=cfg.cortex.verify_ssl,
+                verify=cfg.cortex.ca_bundle or cfg.cortex.verify_ssl,
             )
         except HttpError as exc:
             cat, msg = classify_for_uimessage(cls._classify(str(exc)))
             response.addUIMessage(msg, cat)
             return
 
-        applicable = [a for a in analyzers if cortex_type in a.get("dataTypeList", [])]
+        applicable = [a for a in analyzers if cortex_type in a.get("dataTypeList", []) and a.get("id") in cfg.cortex_allowed_analyzers][:cfg.cortex_max_analyzers_per_run]
         if not applicable:
             response.addUIMessage(
                 f"no Cortex analyzers support dataType={cortex_type}", "Inform"
@@ -86,12 +95,12 @@ class CortexAnalyze(DiscoverableTransform):
                     f"{cfg.cortex.url}/api/analyzer/{analyzer['id']}/run",
                     json_body={"data": request.Value, "dataType": cortex_type, "tlp": 2},
                     headers=headers,
-                    verify=cfg.cortex.verify_ssl,
+                    verify=cfg.cortex.ca_bundle or cfg.cortex.verify_ssl,
                 )
                 report = client.get_json(
                     f"{cfg.cortex.url}/api/job/{job['id']}/waitreport",
                     headers=headers,
-                    verify=cfg.cortex.verify_ssl,
+                    verify=cfg.cortex.ca_bundle or cfg.cortex.verify_ssl,
                 )
             except HttpError as exc:
                 response.addUIMessage(
